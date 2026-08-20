@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="HabitFlow — a premium multilingual habit tracking dashboard."
+    />
+    <meta name="theme-color" content="#090b0d" />
+    <title>HabitFlow — Habit Tracker</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/app.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar" aria-label="Primary navigation">
+        <div class="brand">
+          <span class="brand__mark" aria-hidden="true"
+            ><span></span><span></span><span></span
+          ></span>
+          <span class="brand__name">Habit<span>Flow</span></span>
+        </div>
+
+        <nav class="nav-menu">
+          <p class="nav-menu__label" data-i18n="menu">Menu</p>
+          <a class="nav-link active" href="#dashboard" aria-current="page">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="3" width="7" height="7" rx="2"></rect>
+              <rect x="14" y="3" width="7" height="7" rx="2"></rect>
+              <rect x="3" y="14" width="7" height="7" rx="2"></rect>
+              <rect x="14" y="14" width="7" height="7" rx="2"></rect>
+            </svg>
+            <span data-i18n="dashboard">Dashboard</span>
+          </a>
+          <a class="nav-link" href="#today-habits">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 11l3 3L22 4"></path>
+              <path
+                d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"
+              ></path>
+            </svg>
+            <span data-i18n="habits">Habits</span>
+          </a>
+          <a class="nav-link" href="#analytics">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 19V9"></path>
+              <path d="M10 19V5"></path>
+              <path d="M16 19v-7"></path>
+              <path d="M22 19V3"></path>
+            </svg>
+            <span data-i18n="analytics">Analytics</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-card">
+          <div class="sidebar-card__icon" aria-hidden="true">↗</div>
+          <p class="sidebar-card__eyebrow" data-i18n="weeklyFocus">
+            Weekly focus
+          </p>
+          <strong data-i18n="keepMomentum">Keep the momentum</strong>
+          <div class="mini-progress" aria-hidden="true">
+            <span id="weekly-progress-bar"></span>
+          </div>
+          <small id="weekly-progress-text"> 0% completed </small>
+        </div>
+
+        <div class="profile">
+          <div class="profile__avatar" id="profile-avatar" aria-hidden="true">
+            YA
+          </div>
+
+          <div>
+            <strong id="profile-name">Yassine</strong>
+            <span data-i18n="freePlan">Free plan</span>
+          </div>
+          <button
+            class="icon-button profile__more"
+            id="open-settings-button"
+            type="button"
+            aria-label="Open settings"
+          >
+            •••
+          </button>
+        </div>
+      </aside>
+
+      <button
+        class="sidebar-overlay"
+        id="sidebar-overlay"
+        type="button"
+        aria-label="Close navigation"
+      ></button>
+
+      <main class="main-content" id="dashboard">
+        <header class="topbar">
+          <button
+            class="icon-button mobile-menu-button"
+            id="mobile-menu-button"
+            type="button"
+            aria-label="Open navigation"
+            aria-controls="sidebar"
+            aria-expanded="false"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 7h16M4 12h16M4 17h16"></path>
+            </svg>
+          </button>
+
+          <div class="topbar__copy">
+            <p class="eyebrow" data-i18n="overview">Daily overview</p>
+            <h1 data-i18n="greeting">Good Morning 👋</h1>
+            <p data-i18n="motivation">Build consistency, one day at a time.</p>
+          </div>
+
+          <div class="topbar__actions">
+            <div class="language" id="language">
+              <button
+                class="language__trigger"
+                id="language-trigger"
+                type="button"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="12" r="9"></circle>
+                  <path
+                    d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"
+                  ></path>
+                </svg>
+                <span id="language-code">EN</span>
+                <svg
+                  class="language__chevron"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path d="m8 10 4 4 4-4"></path>
+                </svg>
+              </button>
+              <div class="language__menu" id="language-menu" role="listbox" aria-label="Select language">
+                <button type="button" role="option" data-lang="en">
+                  English <span>EN</span>
+                </button>
+                <button type="button" role="option" data-lang="fr">
+                  Français <span>FR</span>
+                </button>
+                <button type="button" role="option" data-lang="ar">
+                  العربية <span>AR</span>
+                </button>
+              </div>
+            </div>
+
+            <button
+              class="button button--primary"
+              id="manage-habits-button"
+              type="button"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 5v14M5 12h14"></path>
+              </svg>
+              <span data-i18n="manageHabits">Manage Habits</span>
+            </button>
+          </div>
+        </header>
+
+        <section class="stats-grid" aria-label="Habit statistics">
+          <article class="stat-card stat-card--progress">
+            <div class="stat-card__header">
+              <span class="stat-card__icon"
+                ><svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"
+                  ></path></svg
+              ></span>
+              <span class="stat-card__trend">+12%</span>
+            </div>
+            <p data-i18n="todayProgress">Today's Progress</p>
+            <div class="stat-card__value-row">
+              <strong id="today-progress-value"> 0 <span>/ 0</span> </strong>
+
+              <div
+                class="progress-ring"
+                id="today-progress-ring"
+                aria-label="0 percent"
+              >
+                <span id="today-progress-percent">0%</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-card__header">
+              <span class="stat-card__icon stat-card__icon--orange">🔥</span
+              ><span class="stat-card__badge" data-i18n="active">Active</span>
+            </div>
+            <p data-i18n="currentStreak">Current Streak</p>
+            <strong class="stat-card__value">
+              <span id="current-streak-value">0</span>
+              <small data-i18n="days">Days</small>
+            </strong>
+            <span class="stat-card__caption" data-i18n="personalBestGap"
+              >13 days to your best</span
+            >
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-card__header">
+              <span class="stat-card__icon stat-card__icon--violet">🏆</span
+              ><span
+                class="stat-card__badge stat-card__badge--subtle"
+                data-i18n="record"
+                >Record</span
+              >
+            </div>
+            <p data-i18n="bestStreak">Best Streak</p>
+            <strong class="stat-card__value">
+              <span id="best-streak-value">0</span>
+              <small data-i18n="days">Days</small>
+            </strong>
+            <span class="stat-card__caption" data-i18n="setInJune"
+              >Set in June 2026</span
+            >
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-card__header">
+              <span class="stat-card__icon stat-card__icon--blue"
+                ><svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 19V9M10 19V5M16 19v-7M22 19V3"></path></svg></span
+              ><span class="stat-card__trend">+6%</span>
+            </div>
+            <p data-i18n="monthlyScore">Monthly Score</p>
+            <strong class="stat-card__value">
+              <span id="monthly-score-value">0</span>
+              <small>%</small>
+            </strong>
+            <span class="stat-card__caption" data-i18n="vsLastMonth"
+              >vs. last month</span
+            >
+          </article>
+        </section>
+
+        <section class="panel habits-panel" id="today-habits">
+          <div class="section-heading">
+            <div>
+              <h2 data-i18n="todaysHabits">Today's Habits</h2>
+              <p data-i18n="habitsSubtitle">
+                Small actions, meaningful progress.
+              </p>
+            </div>
+            <span class="section-heading__badge" id="today-tasks-count">
+              0 tasks
+            </span>
+          </div>
+
+          <div class="habit-list" id="habit-list"></div>
+        </section>
+
+        <section class="panel tracker-panel" id="habit-tracker">
+          <div class="section-heading tracker-heading">
+            <div>
+              <p class="eyebrow" data-i18n="consistencyOverview">
+                Consistency overview
+              </p>
+              <h2 data-i18n="habitTracker">Habit Tracker</h2>
+            </div>
+            <div class="month-nav" aria-label="Month navigation">
+              <button
+                class="icon-button"
+                type="button"
+                data-month-action="previous"
+                data-i18n-aria="previousMonth"
+                aria-label="Previous month"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m15 18-6-6 6-6"></path>
+                </svg>
+              </button>
+              <strong id="current-month-label">August 2026</strong>
+              <button
+                class="icon-button"
+                type="button"
+                data-month-action="next"
+                data-i18n-aria="nextMonth"
+                aria-label="Next month"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m9 18 6-6-6-6"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="tracker-meta">
+            <div class="tracker-legend" aria-label="Tracker legend">
+              <span
+                ><i class="legend-dot legend-dot--complete"></i
+                ><span data-i18n="completed">Completed</span></span
+              >
+              <span
+                ><i class="legend-dot legend-dot--missed"></i
+                ><span data-i18n="missed">Missed</span></span
+              >
+              <span
+                ><i class="legend-dot"></i
+                ><span data-i18n="empty">Empty</span></span
+              >
+            </div>
+            <p data-i18n="scrollHint">
+              Scroll horizontally to explore the month
+            </p>
+          </div>
+
+          <div
+            class="tracker-scroll"
+            tabindex="0"
+            aria-label="Monthly habit tracker table"
+          >
+            <table class="tracker-table">
+              <thead>
+                <tr id="tracker-days">
+                  <th data-i18n="habit">Habit</th>
+                </tr>
+              </thead>
+              <tbody id="tracker-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel analytics-panel" id="analytics">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Performance insights</p>
+              <h2>Analytics</h2>
+            </div>
+          </div>
+
+          <div class="analytics-grid">
+            <article class="analytics-card">
+              <span class="analytics-card__label">Completion Rate</span>
+              <strong id="analytics-completion-rate">0%</strong>
+              <small>This month</small>
+            </article>
+
+            <article class="analytics-card">
+              <span class="analytics-card__label">Strongest Habit</span>
+              <strong id="analytics-strongest-habit">—</strong>
+              <small id="analytics-strongest-rate">0%</small>
+            </article>
+
+            <article class="analytics-card">
+              <span class="analytics-card__label">Needs Attention</span>
+              <strong id="analytics-weakest-habit">—</strong>
+              <small id="analytics-weakest-rate">0%</small>
+            </article>
+
+            <article class="analytics-card">
+              <span class="analytics-card__label">Completed Tasks</span>
+              <strong id="analytics-completed-total">0</strong>
+              <small>This month</small>
+            </article>
+          </div>
+          <div class="analytics-charts">
+            <article class="analytics-chart-card">
+              <div class="analytics-chart-card__header">
+                <div>
+                  <span class="analytics-chart-card__eyebrow"> This week </span>
+                  <h3>Weekly Completion</h3>
+                </div>
+              </div>
+
+              <div
+                class="weekly-chart"
+                id="weekly-chart"
+                aria-label="Weekly completion chart"
+              ></div>
+            </article>
+
+            <article class="analytics-chart-card">
+              <div class="analytics-chart-card__header">
+                <div>
+                  <span class="analytics-chart-card__eyebrow">
+                    This month
+                  </span>
+                  <h3>Habit Performance</h3>
+                </div>
+              </div>
+
+              <div
+                class="habit-performance-chart"
+                id="habit-performance-chart"
+                aria-label="Habit performance chart"
+              ></div>
+            </article>
+          </div>
+        </section>
+
+        <footer class="footer">
+          <p>© 2026 HabitFlow</p>
+          <p data-i18n="footerNote">Designed for steady progress.</p>
+        </footer>
+      </main>
+    </div>
+    <div class="modal-overlay" id="manage-habits-modal" aria-hidden="true">
+      <div
+        class="modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="manage-habits-title"
+      >
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Habit settings</p>
+            <h2 id="manage-habits-title">Manage Habits</h2>
+          </div>
+
+          <button
+            class="icon-button"
+            id="close-manage-habits"
+            type="button"
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="manage-habits-list" id="manage-habits-list"></div>
+
+          <button
+            class="button button--primary add-habit-button"
+            id="add-habit-button"
+            type="button"
+          >
+            + Add Habit
+          </button>
+          <form class="habit-form" id="habit-form" hidden>
+            <div class="habit-form__header">
+              <div>
+                <p class="eyebrow">New habit</p>
+                <h3>Add Habit</h3>
+              </div>
+
+              <button
+                class="icon-button"
+                id="cancel-habit-form"
+                type="button"
+                aria-label="Cancel"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div class="habit-form__grid">
+              <label class="form-field">
+                <span>Habit name</span>
+
+                <input
+                  id="habit-name"
+                  type="text"
+                  maxlength="40"
+                  placeholder="Example: Morning walk"
+                  required
+                />
+              </label>
+
+              <label class="form-field">
+                <span>Target</span>
+
+                <input
+                  id="habit-target"
+                  type="text"
+                  maxlength="40"
+                  placeholder="Example: 30 minutes"
+                  required
+                />
+              </label>
+
+              <label class="form-field">
+                <span>Time</span>
+
+                <input id="habit-time" type="time" />
+              </label>
+
+              <label class="form-field">
+                <span>Icon</span>
+
+                <select id="habit-icon">
+                  <option value="✦">✦ Focus</option>
+                  <option value="↗">↗ Activity</option>
+                  <option value="▤">▤ Reading</option>
+                  <option value="◒">◒ Wellness</option>
+                  <option value="✓">✓ General</option>
+                </select>
+              </label>
+
+              <label class="form-field">
+                <span>Color</span>
+
+                <select id="habit-color">
+                  <option value="green">Green</option>
+                  <option value="violet">Violet</option>
+                  <option value="amber">Amber</option>
+                  <option value="blue">Blue</option>
+                  <option value="pink">Pink</option>
+                </select>
+              </label>
+              <label class="form-field">
+                <span>Schedule</span>
+
+                <select id="habit-schedule">
+                  <option value="everyday">Every day</option>
+                  <option value="weekdays">Weekdays</option>
+                  <option value="custom">Custom days</option>
+                </select>
+              </label>
+            </div>
+            <div class="custom-days" id="custom-days" hidden>
+              <span class="custom-days__label">Choose days</span>
+
+              <div class="custom-days__options">
+                <label>
+                  <input type="checkbox" value="1" />
+                  <span>Mon</span>
+                </label>
+
+                <label>
+                  <input type="checkbox" value="2" />
+                  <span>Tue</span>
+                </label>
+
+                <label>
+                  <input type="checkbox" value="3" />
+                  <span>Wed</span>
+                </label>
+
+                <label>
+                  <input type="checkbox" value="4" />
+                  <span>Thu</span>
+                </label>
+
+                <label>
+                  <input type="checkbox" value="5" />
+                  <span>Fri</span>
+                </label>
+
+                <label>
+                  <input type="checkbox" value="6" />
+                  <span>Sat</span>
+                </label>
+
+                <label>
+                  <input type="checkbox" value="0" />
+                  <span>Sun</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="habit-form__actions">
+              <button class="button" id="cancel-habit-button" type="button">
+                Cancel
+              </button>
+
+              <button class="button button--primary" type="submit">
+                Save Habit
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="modal-overlay" id="settings-modal" aria-hidden="true">
+      <div
+        class="modal-card settings-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="settings-title"
+      >
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow" data-i18n="preferences">Preferences</p>
+
+            <h2 id="settings-title" data-i18n="settings">Settings</h2>
+          </div>
+
+          <button
+            class="icon-button"
+            id="close-settings-button"
+            type="button"
+            aria-label="Close settings"
+            data-i18n-aria="closeSettings"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <section class="settings-section">
+            <div class="settings-section__heading">
+              <div>
+                <h3 data-i18n="profile">Profile</h3>
+                <p data-i18n="profileDescription">
+                  Personalize your HabitFlow experience.
+                </p>
+              </div>
+            </div>
+
+            <div class="settings-profile-preview">
+              <div
+                class="settings-profile-preview__avatar"
+                id="settings-avatar-preview"
+              >
+                YA
+              </div>
+
+              <div>
+                <strong id="settings-name-preview"> Yassine </strong>
+
+                <span data-i18n="habitflowUser"> HabitFlow user </span>
+              </div>
+            </div>
+
+            <div class="settings-form-grid">
+              <label class="form-field">
+                <span data-i18n="yourName">Your name</span>
+
+                <input
+                  id="settings-name"
+                  type="text"
+                  maxlength="30"
+                  placeholder="Your name"
+                />
+              </label>
+            </div>
+            <div class="settings-preferences">
+              <div class="settings-section__heading">
+                <div>
+                  <h3 data-i18n="preferences">Preferences</h3>
+                  <p data-i18n="preferencesDescription">
+                    Customize how HabitFlow works for you.
+                  </p>
+                </div>
+              </div>
+
+              <div class="settings-form-grid">
+                <label class="form-field">
+                  <span data-i18n="defaultLanguage">Default language</span>
+
+                  <select id="settings-language">
+                    <option value="en">English</option>
+                    <option value="fr">Français</option>
+                    <option value="ar">العربية</option>
+                  </select>
+                </label>
+
+                <label class="form-field">
+                  <span data-i18n="weekStartsOn">Week starts on</span>
+
+                  <select id="settings-week-start">
+                    <option value="monday" data-i18n="monday">Monday</option>
+
+                    <option value="sunday" data-i18n="sunday">Sunday</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <div class="settings-data">
+            <div class="settings-section__heading">
+              <div>
+                <h3 data-i18n="dataManagement">Data Management</h3>
+                <p data-i18n="dataManagementDescription">
+                  Backup or restore your HabitFlow data.
+                </p>
+              </div>
+            </div>
+
+            <div class="settings-data__actions">
+              <button
+                class="button"
+                id="export-data-button"
+                type="button"
+                data-i18n-aria="exportBackup"
+              >
+                Export Backup
+              </button>
+
+              <button
+                class="button"
+                id="import-data-button"
+                type="button"
+                data-i18n-aria="importBackup"
+              >
+                Import Backup
+              </button>
+
+              <button
+                class="button settings-danger-button"
+                id="reset-data-button"
+                type="button"
+                data-i18n-aria="resetData"
+              >
+                Reset Data
+              </button>
+            </div>
+
+            <input
+              id="import-data-input"
+              type="file"
+              accept="application/json,.json"
+              hidden
+            />
+          </div>
+
+          <div class="settings-actions">
+            <button
+              class="button"
+              id="cancel-settings-button"
+              type="button"
+              data-i18n="cancel"
+            >
+              Cancel
+            </button>
+
+            <button
+              class="button button--primary"
+              id="save-settings-button"
+              type="button"
+              data-i18n="saveChanges"
+            >
+              Save changes
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="toast"
+      id="app-toast"
+      role="status"
+      aria-live="polite"
+      aria-hidden="true"
+    >
+      <span class="toast__icon" id="toast-icon">✓</span>
+
+      <div class="toast__content">
+        <strong id="toast-title">Success</strong>
+        <p id="toast-message">Operation completed successfully.</p>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="confirm-modal" aria-hidden="true">
+      <div
+        class="modal-card confirm-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-title"
+      >
+        <div class="modal-header">
+          <h2 id="confirm-title">Confirm action</h2>
+
+          <button
+            class="icon-button"
+            id="close-confirm-button"
+            type="button"
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <p class="confirm-message" id="confirm-message">Are you sure?</p>
+
+          <div class="confirm-actions">
+            <button class="button" id="confirm-cancel-button" type="button">
+              Cancel
+            </button>
+
+            <button
+              class="button button--primary"
+              id="confirm-ok-button"
+              type="button"
+            >
+              Confirm
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
