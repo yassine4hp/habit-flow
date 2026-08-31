@@ -1,5 +1,626 @@
 "use strict";
 
+const SUPABASE_URL = "https://lclsjhqdprftbnfvvlac.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_mVuwXWL431eWOWxPZQhXsQ_4c9G8jS-";
+
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
+  },
+);
+
+const authScreen = document.getElementById("auth-screen");
+const appShell = document.getElementById("app-shell");
+
+const showLoginButton = document.getElementById("show-login");
+const showSignupButton = document.getElementById("show-signup");
+
+const loginForm = document.getElementById("login-form");
+const signupForm = document.getElementById("signup-form");
+const verificationView = document.getElementById("verification-view");
+
+const authHeading = document.getElementById("auth-heading");
+const authSubtitle = document.getElementById("auth-subtitle");
+
+const forgotPasswordButton = document.getElementById("forgot-password-button");
+const forgotPasswordView = document.getElementById("forgot-password-view");
+const forgotBackButton = document.getElementById("forgot-back-button");
+
+const forgotPasswordForm = document.getElementById("forgot-password-form");
+const forgotPasswordEmail = document.getElementById("forgot-password-email");
+const forgotPasswordSubmit = document.getElementById("forgot-password-submit");
+
+const forgotPasswordError = document.getElementById("forgot-password-error");
+const forgotPasswordSuccess = document.getElementById("forgot-password-success");
+
+const newPasswordView = document.getElementById("new-password-view");
+const newPasswordForm = document.getElementById("new-password-form");
+const newPasswordInput = document.getElementById("new-password");
+const confirmNewPasswordInput = document.getElementById("confirm-new-password");
+const newPasswordSubmit = document.getElementById("new-password-submit");
+const newPasswordError = document.getElementById("new-password-error");
+const newPasswordSuccess = document.getElementById("new-password-success");
+
+async function checkExistingSession() {
+  const rememberMe =
+    localStorage.getItem("habitflow-remember-me") === "true";
+
+  const sessionOnly =
+    sessionStorage.getItem("habitflow-session-only") === "true";
+
+  const {
+    data: { session },
+  } = await supabaseClient.auth.getSession();
+
+  if (session && !rememberMe && !sessionOnly) {
+    await supabaseClient.auth.signOut();
+
+    authScreen.hidden = false;
+    appShell.hidden = true;
+    showLoginView();
+
+    return;
+  }
+
+  if (session) {
+    authScreen.hidden = true;
+    appShell.hidden = false;
+  } else {
+    authScreen.hidden = false;
+    appShell.hidden = true;
+    showLoginView();
+  }
+}
+
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  console.log("Auth event:", event);
+
+  if (event === "PASSWORD_RECOVERY") {
+    authScreen.hidden = false;
+    appShell.hidden = true;
+
+    showNewPasswordView();
+  }
+});
+
+checkExistingSession();
+
+function showLoginView() {
+  loginForm.hidden = false;
+  signupForm.hidden = true;
+  verificationView.hidden = true;
+  forgotPasswordView.hidden = true;
+  newPasswordView.hidden = true;
+
+  showLoginButton.classList.add("active");
+  showSignupButton.classList.remove("active");
+
+  authHeading.textContent = "Welcome back 👋";
+  authSubtitle.textContent = "Sign in to continue your journey";
+}
+
+function showSignupView() {
+  loginForm.hidden = true;
+  signupForm.hidden = false;
+  verificationView.hidden = true;
+  forgotPasswordView.hidden = true;
+  newPasswordView.hidden = true;
+
+  showLoginButton.classList.remove("active");
+  showSignupButton.classList.add("active");
+
+  authHeading.textContent = "Create your account";
+  authSubtitle.textContent = "Start building better habits today";
+}
+
+function showNewPasswordView() {
+  loginForm.hidden = true;
+  signupForm.hidden = true;
+  verificationView.hidden = true;
+  forgotPasswordView.hidden = true;
+  newPasswordView.hidden = false;
+
+  showLoginButton.classList.remove("active");
+  showSignupButton.classList.remove("active");
+
+  authHeading.textContent = "Create new password";
+  authSubtitle.textContent = "Choose a new secure password for your account";
+
+  newPasswordError.hidden = true;
+  newPasswordSuccess.hidden = true;
+}
+
+showLoginButton.addEventListener("click", showLoginView);
+showSignupButton.addEventListener("click", showSignupView);
+
+forgotPasswordButton.addEventListener("click", showForgotPasswordView);
+forgotBackButton.addEventListener("click", hideForgotPasswordView);
+
+document.querySelectorAll(".auth-password-toggle").forEach((button) => {
+  button.addEventListener("click", () => {
+    const targetId = button.dataset.passwordTarget;
+    const input = document.getElementById(targetId);
+
+    if (!input) return;
+
+    const isPassword = input.type === "password";
+
+    input.type = isPassword ? "text" : "password";
+    button.setAttribute(
+      "aria-label",
+      isPassword ? "Hide password" : "Show password",
+    );
+  });
+});
+
+forgotPasswordForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  forgotPasswordError.hidden = true;
+  forgotPasswordSuccess.hidden = true;
+
+  const email = forgotPasswordEmail.value.trim().toLowerCase();
+
+  if (!email) {
+    forgotPasswordError.textContent = "Please enter your email address.";
+    forgotPasswordError.hidden = false;
+    return;
+  }
+
+  forgotPasswordSubmit.disabled = true;
+  forgotPasswordSubmit.querySelector("span").textContent = "Sending...";
+
+  try {
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    forgotPasswordSuccess.textContent =
+      "Password reset email sent. Check your inbox.";
+    forgotPasswordSuccess.hidden = false;
+
+  } catch (error) {
+    console.error("Forgot password error:", error);
+
+    forgotPasswordError.textContent =
+      error.message || "Unable to send password reset email.";
+    forgotPasswordError.hidden = false;
+
+  } finally {
+    forgotPasswordSubmit.disabled = false;
+    forgotPasswordSubmit.querySelector("span").textContent =
+      "Send reset email";
+  }
+});
+
+// =========================================================
+// HABITFLOW AUTH — SIGN UP + OTP
+// =========================================================
+
+const signupNameInput = document.getElementById("signup-name");
+const signupEmailInput = document.getElementById("signup-email");
+const signupPasswordInput = document.getElementById("signup-password");
+const signupConfirmPasswordInput = document.getElementById(
+  "signup-confirm-password",
+);
+
+const signupError = document.getElementById("signup-error");
+const signupButton = document.getElementById("signup-button");
+
+const verificationEmail = document.getElementById("verification-email");
+const verificationForm = document.getElementById("verification-form");
+const verificationCodeInput = document.getElementById("verification-code");
+const verificationError = document.getElementById("verification-error");
+const verifyCodeButton = document.getElementById("verify-code-button");
+const resendCodeButton = document.getElementById("resend-code-button");
+const verificationBackButton = document.getElementById(
+  "verification-back-button",
+);
+
+let pendingVerificationEmail = "";
+
+function showAuthError(element, message) {
+  element.textContent = message;
+  element.hidden = false;
+}
+
+function clearAuthError(element) {
+  element.textContent = "";
+  element.hidden = true;
+}
+
+function showVerificationView(email) {
+  loginForm.hidden = true;
+  signupForm.hidden = true;
+  verificationView.hidden = false;
+
+  showLoginButton.classList.remove("active");
+  showSignupButton.classList.remove("active");
+
+  authHeading.textContent = "Check your email";
+  authSubtitle.textContent = "Enter the verification code we sent you";
+
+  verificationEmail.textContent = email;
+}
+
+newPasswordForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  newPasswordError.hidden = true;
+  newPasswordSuccess.hidden = true;
+
+  const password = newPasswordInput.value;
+  const confirmPassword = confirmNewPasswordInput.value;
+
+  if (!password || !confirmPassword) {
+    newPasswordError.textContent = "Please complete both password fields.";
+    newPasswordError.hidden = false;
+    return;
+  }
+
+  if (password.length < 8) {
+    newPasswordError.textContent =
+      "Your password must contain at least 8 characters.";
+    newPasswordError.hidden = false;
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    newPasswordError.textContent = "Passwords do not match.";
+    newPasswordError.hidden = false;
+    return;
+  }
+
+  newPasswordSubmit.disabled = true;
+  newPasswordSubmit.querySelector("span").textContent = "Updating...";
+
+  try {
+    const { error } = await supabaseClient.auth.updateUser({
+      password: password,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    newPasswordSuccess.textContent =
+      "Password updated successfully. You can now sign in.";
+    newPasswordSuccess.hidden = false;
+
+    newPasswordInput.value = "";
+    confirmNewPasswordInput.value = "";
+
+    setTimeout(async () => {
+      await supabaseClient.auth.signOut();
+
+      newPasswordView.hidden = true;
+      authScreen.hidden = false;
+      appShell.hidden = true;
+
+      showLoginView();
+
+      window.history.replaceState(
+        {},
+        document.title,
+        window.location.pathname
+      );
+    }, 1800);
+  } catch (error) {
+    console.error("Update password error:", error);
+
+    newPasswordError.textContent =
+      error.message || "Unable to update your password.";
+    newPasswordError.hidden = false;
+  } finally {
+    newPasswordSubmit.disabled = false;
+    newPasswordSubmit.querySelector("span").textContent = "Update Password";
+  }
+});
+
+// =========================================================
+// HABITFLOW AUTH — LOGIN
+// =========================================================
+
+const loginEmailInput = document.getElementById("login-email");
+const loginPasswordInput = document.getElementById("login-password");
+const loginError = document.getElementById("login-error");
+const loginButton = document.getElementById("login-button");
+
+loginForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  clearAuthError(loginError);
+
+  const email = loginEmailInput.value.trim().toLowerCase();
+  const password = loginPasswordInput.value;
+
+  if (!email || !password) {
+    showAuthError(loginError, "Please enter your email and password.");
+    return;
+  }
+
+  loginButton.disabled = true;
+  loginButton.querySelector("span").textContent = "Signing in...";
+
+  try {
+    const rememberMe = document.getElementById("remember-me").checked;
+    const { data, error } =
+      await supabaseClient.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+    if (error) {
+      throw error;
+    }
+
+    if (rememberMe) {
+  localStorage.setItem("habitflow-remember-me", "true");
+  sessionStorage.removeItem("habitflow-session-only");
+} else {
+  localStorage.setItem("habitflow-remember-me", "false");
+  sessionStorage.setItem("habitflow-session-only", "true");
+}
+
+    console.log("Logged in ✅", data.user?.email);
+
+    authScreen.hidden = true;
+    appShell.hidden = false;
+
+    window.scrollTo(0, 0);
+  } catch (error) {
+    console.error("Login error:", error);
+
+    showAuthError(
+      loginError,
+      error.message || "Invalid email or password.",
+    );
+  } finally {
+    loginButton.disabled = false;
+    loginButton.querySelector("span").textContent = "Sign In";
+  }
+});
+
+
+async function logoutUser() {
+  try {
+    const { error } = await supabaseClient.auth.signOut();
+
+    if (error) {
+      throw error;
+    }
+
+    // Clear Remember Me state
+    localStorage.removeItem("habitflow-remember-me");
+    sessionStorage.removeItem("habitflow-session-only");
+
+    // Show login screen
+    appShell.hidden = true;
+    authScreen.hidden = false;
+
+    showLoginView();
+    window.scrollTo(0, 0);
+
+    console.log("Logged out ✅");
+  } catch (error) {
+    console.error("Logout error:", error);
+  }
+}
+
+
+
+    
+
+ 
+
+
+// =========================================================
+// CREATE ACCOUNT
+// =========================================================
+
+signupForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  clearAuthError(signupError);
+
+  const name = signupNameInput.value.trim();
+  const email = signupEmailInput.value.trim().toLowerCase();
+  const password = signupPasswordInput.value;
+  const confirmPassword = signupConfirmPasswordInput.value;
+
+  if (!name || !email || !password || !confirmPassword) {
+    showAuthError(signupError, "Please complete all fields.");
+    return;
+  }
+
+  if (password.length < 8) {
+    showAuthError(
+      signupError,
+      "Your password must contain at least 8 characters.",
+    );
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    showAuthError(signupError, "Passwords do not match.");
+    return;
+  }
+
+  signupButton.disabled = true;
+  signupButton.querySelector("span").textContent = "Creating account...";
+
+  try {
+    const { data, error } = await supabaseClient.auth.signUp({
+      email,
+      password,
+
+      options: {
+        data: {
+          name,
+        },
+      },
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    pendingVerificationEmail = email;
+
+    showVerificationView(email);
+
+    verificationCodeInput.value = "";
+    verificationCodeInput.focus();
+
+    console.log("Signup created:", data.user?.id);
+  } catch (error) {
+    console.error("Signup error:", error);
+
+    showAuthError(
+      signupError,
+      error.message || "Unable to create your account.",
+    );
+  } finally {
+    signupButton.disabled = false;
+    signupButton.querySelector("span").textContent = "Create Account";
+  }
+});
+
+
+// =========================================================
+// VERIFY OTP
+// =========================================================
+
+verificationForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  clearAuthError(verificationError);
+
+  const token = verificationCodeInput.value.trim();
+
+  if (!/^\d{8}$/.test(token)) {
+    showAuthError(
+      verificationError,
+      "Enter the complete 8-digit verification code.",
+    );
+    return;
+  }
+
+  if (!pendingVerificationEmail) {
+    showAuthError(
+      verificationError,
+      "Verification session expired. Create your account again.",
+    );
+    return;
+  }
+
+  verifyCodeButton.disabled = true;
+  verifyCodeButton.querySelector("span").textContent = "Verifying...";
+
+  try {
+    const { data, error } = await supabaseClient.auth.verifyOtp({
+      email: pendingVerificationEmail,
+      token,
+      type: "signup",
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    console.log("Email verified ✅", data.user?.email);
+
+    authScreen.hidden = true;
+    appShell.hidden = false;
+
+    window.scrollTo({
+      top: 0,
+      behavior: "instant",
+    });
+  } catch (error) {
+    console.error("OTP verification error:", error);
+
+    showAuthError(
+      verificationError,
+      error.message || "The verification code is invalid or expired.",
+    );
+  } finally {
+    verifyCodeButton.disabled = false;
+    verifyCodeButton.querySelector("span").textContent = "Verify Email";
+  }
+});
+
+
+// =========================================================
+// RESEND OTP
+// =========================================================
+
+resendCodeButton.addEventListener("click", async () => {
+  clearAuthError(verificationError);
+
+  if (!pendingVerificationEmail) {
+    showAuthError(
+      verificationError,
+      "No email address found. Please create your account again.",
+    );
+    return;
+  }
+
+  resendCodeButton.disabled = true;
+  resendCodeButton.textContent = "Sending...";
+
+  try {
+    const { error } = await supabaseClient.auth.resend({
+      type: "signup",
+      email: pendingVerificationEmail,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    resendCodeButton.textContent = "Code sent ✓";
+
+    setTimeout(() => {
+      resendCodeButton.textContent = "Resend code";
+      resendCodeButton.disabled = false;
+    }, 3000);
+  } catch (error) {
+    console.error("Resend OTP error:", error);
+
+    showAuthError(
+      verificationError,
+      error.message || "Unable to resend the verification code.",
+    );
+
+    resendCodeButton.textContent = "Resend code";
+    resendCodeButton.disabled = false;
+  }
+});
+
+
+// =========================================================
+// BACK FROM OTP
+// =========================================================
+
+verificationBackButton.addEventListener("click", () => {
+  pendingVerificationEmail = "";
+
+  verificationCodeInput.value = "";
+
+  showSignupView();
+});
+
 const translations = {
   en: {
     menu: "Menu",
@@ -445,6 +1066,8 @@ const importDataInput = document.getElementById("import-data-input");
 
 const resetDataButton = document.getElementById("reset-data-button");
 
+const logoutButton = document.getElementById("logout-button");
+
 const profileName = document.getElementById("profile-name");
 
 const profileAvatar = document.getElementById("profile-avatar");
@@ -469,6 +1092,8 @@ const confirmCancelButton = document.getElementById("confirm-cancel-button");
 
 const closeConfirmButton = document.getElementById("close-confirm-button");
 
+
+
 /*=========================================================================================================== */
 let userProfile = {
   name: "Yassine",
@@ -483,6 +1108,28 @@ let userPreferences = {
 };
 
 let toastTimeout = null;
+
+function showForgotPasswordView() {
+  loginForm.hidden = true;
+  signupForm.hidden = true;
+  verificationView.hidden = true;
+  forgotPasswordView.hidden = false;
+
+  showLoginButton.classList.remove("active");
+  showSignupButton.classList.remove("active");
+
+  authHeading.textContent = "Reset your password";
+  authSubtitle.textContent = "We'll help you get back into your account";
+
+  forgotPasswordError.hidden = true;
+  forgotPasswordSuccess.hidden = true;
+}
+
+function hideForgotPasswordView() {
+  forgotPasswordView.hidden = true;
+
+  showLoginView();
+}
 
 function openConfirmModal(message, title = "Confirm action") {
   if (!confirmModal || !confirmTitle || !confirmMessage) {
@@ -2031,6 +2678,19 @@ if (importDataButton && importDataInput) {
   importDataButton.addEventListener("click", () => {
     importDataInput.click();
   });
+
+  if (logoutButton) {
+  logoutButton.addEventListener("click", async () => {
+    const confirmed = await openConfirmModal(
+      "Are you sure you want to log out?",
+      "Log out",
+    );
+
+    if (!confirmed) return;
+
+    await logoutUser();
+  });
+}
 }
 
 if (importDataInput) {
@@ -2430,3 +3090,43 @@ if ("serviceWorker" in navigator) {
       });
   });
 }
+
+let deferredInstallPrompt = null;
+
+const installAppBtn = document.getElementById("install-app-btn");
+
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+
+  deferredInstallPrompt = event;
+
+  if (installAppBtn) {
+    installAppBtn.hidden = false;
+  }
+});
+
+if (installAppBtn) {
+  installAppBtn.addEventListener("click", async () => {
+    if (!deferredInstallPrompt) return;
+
+    deferredInstallPrompt.prompt();
+
+    const { outcome } = await deferredInstallPrompt.userChoice;
+
+    if (outcome === "accepted") {
+      installAppBtn.hidden = true;
+    }
+
+    deferredInstallPrompt = null;
+  });
+}
+
+window.addEventListener("appinstalled", () => {
+  deferredInstallPrompt = null;
+
+  if (installAppBtn) {
+    installAppBtn.hidden = true;
+  }
+
+  console.log("HabitFlow installed ✅");
+});

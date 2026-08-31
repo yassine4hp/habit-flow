@@ -12,9 +12,705 @@
     <link rel="manifest" href="./manifest.json" />
     <title>HabitFlow — Habit Tracker</title>
     <link rel="stylesheet" href="css/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/app.js" defer></script>
   </head>
   <body>
+
+  <!-- =========================
+       AUTH SCREEN
+  ========================== -->
+  <section class="auth-screen" id="auth-screen">
+
+    <!-- LEFT SIDE -->
+    <div class="auth-showcase">
+
+      <a class="auth-brand" href="#" aria-label="HabitFlow">
+        <span class="auth-brand__mark">✦</span>
+        <span>Habit<span>Flow</span></span>
+      </a>
+
+      <div class="auth-showcase__content">
+
+        <div class="auth-badge">
+          <span>✦</span>
+          Build better habits. Every day.
+        </div>
+
+        <h1 class="auth-title">
+          Small actions,
+          <span>meaningful</span>
+          change.
+        </h1>
+
+        <p class="auth-description">
+          Track your habits, stay consistent
+          and become your best self.
+        </p>
+
+        <div class="auth-benefits">
+
+          <article class="auth-benefit">
+            <div class="auth-benefit__icon">◎</div>
+            <div>
+              <strong>Stay Focused</strong>
+              <p>Set clear goals and track progress without distractions.</p>
+            </div>
+          </article>
+
+          <article class="auth-benefit">
+            <div class="auth-benefit__icon">↗</div>
+            <div>
+              <strong>Build Consistency</strong>
+              <p>Smart habits and streaks help you stay on track.</p>
+            </div>
+          </article>
+
+          <article class="auth-benefit">
+            <div class="auth-benefit__icon">▥</div>
+            <div>
+              <strong>See Progress</strong>
+              <p>Visual insights to celebrate your wins and improve every day.</p>
+            </div>
+          </article>
+
+        </div>
+
+      </div>
+
+      <!-- Decorative achievement visual -->
+      <div class="auth-achievement" aria-hidden="true">
+
+        <div class="auth-achievement__glow"></div>
+
+        <div class="auth-achievement__star">
+          ✦
+        </div>
+
+        <div class="auth-steps">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+
+      </div>
+
+      <!-- Stats -->
+      <div class="auth-stats">
+
+        <div class="auth-stat">
+          <span>♨</span>
+          <strong>12</strong>
+          <small>Day Streak</small>
+        </div>
+
+        <div class="auth-stat">
+          <span>✓</span>
+          <strong>97%</strong>
+          <small>Success Rate</small>
+        </div>
+
+        <div class="auth-stat">
+          <span>🏆</span>
+          <strong>24</strong>
+          <small>Habits Tracked</small>
+        </div>
+
+      </div>
+
+      <!-- Weekly Progress -->
+      <div class="auth-weekly">
+
+        <div class="auth-weekly__header">
+          <strong>Weekly Progress</strong>
+          <span>This Week⌄</span>
+        </div>
+
+        <div class="auth-weekly__chart" aria-hidden="true">
+
+          <div>
+            <span style="height: 42%"></span>
+            <small>Mon</small>
+          </div>
+
+          <div>
+            <span style="height: 58%"></span>
+            <small>Tue</small>
+          </div>
+
+          <div>
+            <span style="height: 48%"></span>
+            <small>Wed</small>
+          </div>
+
+          <div>
+            <span style="height: 66%"></span>
+            <small>Thu</small>
+          </div>
+
+          <div class="active">
+            <span style="height: 88%"></span>
+            <small>Fri</small>
+          </div>
+
+          <div>
+            <span style="height: 60%"></span>
+            <small>Sat</small>
+          </div>
+
+          <div>
+            <span style="height: 30%"></span>
+            <small>Sun</small>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- RIGHT SIDE -->
+    <div class="auth-form-side">
+
+      <div class="auth-card">
+
+        <div class="auth-card__header">
+
+          <div>
+            <h2 id="auth-heading">
+              Welcome back 👋
+            </h2>
+
+            <p id="auth-subtitle">
+              Sign in to continue your journey
+            </p>
+          </div>
+
+        </div>
+
+
+        <!-- AUTH TABS -->
+        <div class="auth-tabs">
+
+          <button
+            class="auth-tab active"
+            id="show-login"
+            type="button"
+          >
+            Sign In
+          </button>
+
+          <button
+            class="auth-tab"
+            id="show-signup"
+            type="button"
+          >
+            Create Account
+          </button>
+
+        </div>
+
+
+        <!-- =========================
+             LOGIN FORM
+        ========================== -->
+        <form class="auth-form" id="login-form">
+
+          <label class="auth-field">
+
+            <span>Email</span>
+
+            <div class="auth-input">
+              <span class="auth-input__icon">✉</span>
+
+              <input
+                id="login-email"
+                type="email"
+                placeholder="you@example.com"
+                autocomplete="email"
+                required
+              />
+            </div>
+
+          </label>
+
+
+          <label class="auth-field">
+
+            <span>Password</span>
+
+            <div class="auth-input">
+
+              <span class="auth-input__icon">♙</span>
+
+              <input
+                id="login-password"
+                type="password"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+                minlength="8"
+                required
+              />
+
+              <button
+                class="auth-password-toggle"
+                type="button"
+                data-password-target="login-password"
+                aria-label="Show password"
+              >
+                ◉
+              </button>
+
+            </div>
+
+          </label>
+
+
+          <div class="auth-options">
+
+            <label class="auth-remember">
+              <input
+                id="remember-me"
+                type="checkbox"
+                checked
+              />
+              <span>Remember me</span>
+            </label>
+
+            <button
+              class="auth-link"
+              id="forgot-password-button"
+              type="button"
+            >
+              Forgot password?
+            </button>
+
+          </div>
+
+
+          <button
+            class="auth-submit"
+            id="login-button"
+            type="submit"
+          >
+            <span>Sign In</span>
+            <span>→</span>
+          </button>
+
+          <p
+            class="auth-error"
+            id="login-error"
+            role="alert"
+            hidden
+          ></p>
+
+        </form>
+
+
+        <!-- =========================
+             SIGNUP FORM
+        ========================== -->
+        <form
+          class="auth-form"
+          id="signup-form"
+          hidden
+        >
+
+          <label class="auth-field">
+
+            <span>Your name</span>
+
+            <div class="auth-input">
+
+              <span class="auth-input__icon">◯</span>
+
+              <input
+                id="signup-name"
+                type="text"
+                placeholder="Your name"
+                autocomplete="name"
+                maxlength="40"
+                required
+              />
+
+            </div>
+
+          </label>
+
+
+          <label class="auth-field">
+
+            <span>Email</span>
+
+            <div class="auth-input">
+
+              <span class="auth-input__icon">✉</span>
+
+              <input
+                id="signup-email"
+                type="email"
+                placeholder="you@example.com"
+                autocomplete="email"
+                required
+              />
+
+            </div>
+
+          </label>
+
+
+          <label class="auth-field">
+
+            <span>Password</span>
+
+            <div class="auth-input">
+
+              <span class="auth-input__icon">♙</span>
+
+              <input
+                id="signup-password"
+                type="password"
+                placeholder="Create a password"
+                autocomplete="new-password"
+                minlength="8"
+                required
+              />
+
+              <button
+                class="auth-password-toggle"
+                type="button"
+                data-password-target="signup-password"
+                aria-label="Show password"
+              >
+                ◉
+              </button>
+
+            </div>
+
+          </label>
+
+
+          <label class="auth-field">
+
+            <span>Confirm password</span>
+
+            <div class="auth-input">
+
+              <span class="auth-input__icon">♙</span>
+
+              <input
+                id="signup-confirm-password"
+                type="password"
+                placeholder="Repeat your password"
+                autocomplete="new-password"
+                minlength="8"
+                required
+              />
+
+            </div>
+
+          </label>
+
+
+          <button
+            class="auth-submit"
+            id="signup-button"
+            type="submit"
+          >
+            <span>Create Account</span>
+            <span>→</span>
+          </button>
+
+          <p class="auth-terms">
+            By creating an account, you agree to use HabitFlow responsibly.
+          </p>
+
+          <p
+            class="auth-error"
+            id="signup-error"
+            role="alert"
+            hidden
+          ></p>
+
+        </form>
+
+
+        <!-- =========================
+             OTP VERIFICATION
+        ========================== -->
+        <div
+          class="auth-verification"
+          id="verification-view"
+          hidden
+        >
+
+          <button
+            class="auth-back"
+            id="verification-back-button"
+            type="button"
+          >
+            ← Back
+          </button>
+
+          <div class="auth-verification__icon">
+            ✉
+          </div>
+
+          <h2>Verify your email</h2>
+
+          <p>
+            We've sent an 8-digit verification code to
+          </p>
+
+          <strong id="verification-email">
+            your@email.com
+          </strong>
+
+
+          <form
+            class="verification-form"
+            id="verification-form"
+          >
+
+            <label
+              class="auth-field"
+              for="verification-code"
+            >
+              <span>Verification code</span>
+
+              <input
+                class="verification-code-input"
+                id="verification-code"
+                type="text"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+                maxlength="8"
+                placeholder="00000000"
+                required
+              />
+            </label>
+
+            <button
+              class="auth-submit"
+              id="verify-code-button"
+              type="submit"
+            >
+              <span>Verify Email</span>
+              <span>→</span>
+            </button>
+
+          </form>
+
+
+          <div class="auth-resend">
+
+            <span>Didn't receive the code?</span>
+
+            <button
+              id="resend-code-button"
+              type="button"
+            >
+              Resend code
+            </button>
+
+          </div>
+
+          <p
+            class="auth-error"
+            id="verification-error"
+            role="alert"
+            hidden
+          ></p>
+
+        </div>
+
+        <!-- =========================
+     FORGOT PASSWORD
+========================== -->
+<div
+  class="auth-verification"
+  id="forgot-password-view"
+  hidden
+>
+  <button
+    class="auth-back"
+    id="forgot-back-button"
+    type="button"
+  >
+    ← Back
+  </button>
+
+  <div class="auth-verification__icon">
+    🔑
+  </div>
+
+  <h2>Reset your password</h2>
+
+  <p>
+    Enter the email associated with your HabitFlow account.
+  </p>
+
+  <form
+    class="verification-form"
+    id="forgot-password-form"
+  >
+    <label class="auth-field">
+      <span>Email</span>
+
+      <div class="auth-input">
+        <span class="auth-input__icon">✉</span>
+
+        <input
+          id="forgot-password-email"
+          type="email"
+          placeholder="you@example.com"
+          autocomplete="email"
+          required
+        />
+      </div>
+    </label>
+
+    <button
+      class="auth-submit"
+      id="forgot-password-submit"
+      type="submit"
+    >
+      <span>Send reset email</span>
+      <span>→</span>
+    </button>
+  </form>
+
+  <p
+    class="auth-error"
+    id="forgot-password-error"
+    role="alert"
+    hidden
+  ></p>
+
+  <p
+    class="auth-success"
+    id="forgot-password-success"
+    hidden
+  ></p>
+</div>
+
+       <!-- =========================
+     NEW PASSWORD
+========================== -->
+<div
+  class="auth-verification"
+  id="new-password-view"
+  hidden
+>
+  <div class="auth-verification__icon">
+    🔐
+  </div>
+
+  <h2>Create a new password</h2>
+
+  <p>
+    Choose a strong password for your HabitFlow account.
+  </p>
+
+  <form
+    class="verification-form"
+    id="new-password-form"
+  >
+    <label class="auth-field">
+      <span>New password</span>
+
+      <div class="auth-input">
+        <span class="auth-input__icon">♙</span>
+
+        <input
+          id="new-password"
+          type="password"
+          placeholder="Enter new password"
+          autocomplete="new-password"
+          minlength="8"
+          required
+        />
+
+        <button
+          class="auth-password-toggle"
+          type="button"
+          data-password-target="new-password"
+          aria-label="Show password"
+        >
+          ◉
+        </button>
+      </div>
+    </label>
+
+    <label class="auth-field">
+      <span>Confirm password</span>
+
+      <div class="auth-input">
+        <span class="auth-input__icon">♙</span>
+
+        <input
+          id="confirm-new-password"
+          type="password"
+          placeholder="Repeat new password"
+          autocomplete="new-password"
+          minlength="8"
+          required
+        />
+      </div>
+    </label>
+
+    <button
+      class="auth-submit"
+      id="new-password-submit"
+      type="submit"
+    >
+      <span>Update Password</span>
+      <span>→</span>
+    </button>
+  </form>
+
+  <p
+    class="auth-error"
+    id="new-password-error"
+    role="alert"
+    hidden
+  ></p>
+
+  <p
+    class="auth-success"
+    id="new-password-success"
+    hidden
+  ></p>
+</div>
+
+        <div class="auth-security">
+          🔒 Your data is secure and private
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <footer class="auth-footer">
+      © 2026 HabitFlow. All rights reserved.
+    </footer>
+
+  </section>
+
+
+  <!-- =========================
+      HABITFLOW APP
+  ========================== -->
+  <div
+    class="app-shell"
+    id="app-shell"
+    hidden
+  >
+
     <div class="app-shell">
       <aside class="sidebar" id="sidebar" aria-label="Primary navigation">
         <div class="brand">
@@ -53,6 +749,19 @@
             </svg>
             <span data-i18n="analytics">Analytics</span>
           </a>
+          <button
+  class="nav-link install-app-btn"
+  id="install-app-btn"
+  type="button"
+  hidden
+>
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M12 3v12"></path>
+    <path d="M7 10l5 5 5-5"></path>
+    <path d="M5 21h14"></path>
+  </svg>
+  <span>Install App</span>
+</button>
         </nav>
 
         <div class="sidebar-card">
@@ -714,6 +1423,23 @@
               hidden
             />
           </div>
+          
+          <div class="settings-account">
+  <div class="settings-section__heading">
+    <div>
+      <h3>Account</h3>
+      <p>Manage your current HabitFlow session.</p>
+    </div>
+  </div>
+
+  <button
+    class="button settings-logout-button"
+    id="logout-button"
+    type="button"
+  >
+    Log out
+  </button>
+</div>
 
           <div class="settings-actions">
             <button
