@@ -11,7 +11,7 @@
     <link rel="icon" type="image/png" href="./icons/icon-192.png" />
     <link rel="manifest" href="./manifest.json" />
     <title>HabitFlow — Habit Tracker</title>
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="blue.css" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/app.js" defer></script>
   </head>
@@ -21,6 +21,15 @@
        AUTH SCREEN
   ========================== -->
   <section class="auth-screen" id="auth-screen">
+
+    <button
+  class="auth-theme-toggle"
+  id="auth-theme-toggle"
+  type="button"
+  aria-label="Switch theme"
+>
+  <span id="auth-theme-icon">🌙</span>
+</button>
 
     <!-- LEFT SIDE -->
     <div class="auth-showcase">
@@ -825,6 +834,14 @@
           </div>
 
           <div class="topbar__actions">
+            <button
+  class="theme-toggle"
+  id="theme-toggle"
+  type="button"
+  aria-label="Switch theme"
+>
+  <span id="theme-icon">🌙</span>
+</button>
             <div class="language" id="language">
               <button
                 class="language__trigger"

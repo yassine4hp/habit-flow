@@ -3130,3 +3130,93 @@ window.addEventListener("appinstalled", () => {
 
   console.log("HabitFlow installed ✅");
 });
+
+/* =========================
+   LIGHT / DARK MODE
+========================= */
+
+const themeToggle = document.getElementById("theme-toggle");
+const themeIcon = document.getElementById("theme-icon");
+
+const authThemeToggle = document.getElementById("auth-theme-toggle");
+const authThemeIcon = document.getElementById("auth-theme-icon");
+
+
+function setTheme(theme) {
+
+  document.documentElement.setAttribute(
+    "data-theme",
+    theme
+  );
+
+  localStorage.setItem(
+    "habitflow-theme",
+    theme
+  );
+
+  const icon =
+    theme === "dark"
+      ? "☀️"
+      : "🌙";
+
+
+  if (themeIcon) {
+    themeIcon.textContent = icon;
+  }
+
+  if (authThemeIcon) {
+    authThemeIcon.textContent = icon;
+  }
+
+}
+
+
+function toggleTheme() {
+
+  const currentTheme =
+    document.documentElement.getAttribute(
+      "data-theme"
+    );
+
+  const newTheme =
+    currentTheme === "dark"
+      ? "light"
+      : "dark";
+
+  setTheme(newTheme);
+
+}
+
+
+/* Load saved theme */
+
+const savedTheme =
+  localStorage.getItem(
+    "habitflow-theme"
+  ) || "light";
+
+setTheme(savedTheme);
+
+
+/* Dashboard button */
+
+if (themeToggle) {
+
+  themeToggle.addEventListener(
+    "click",
+    toggleTheme
+  );
+
+}
+
+
+/* Login button */
+
+if (authThemeToggle) {
+
+  authThemeToggle.addEventListener(
+    "click",
+    toggleTheme
+  );
+
+}
